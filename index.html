@@ -11,6 +11,36 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="css/style.css" />
+    <script>
+      window.addEventListener("load", init);
+  
+      function init() {
+        /** @type {HTMLElement[]} */
+        const elementList = document.querySelectorAll(".my-effect");
+  
+        for (let i = 0; i < elementList.length; i++) {
+  
+          const element = elementList[i];
+  
+          // インスタンスを取得する
+          const effect = new ShuffleText(element);
+  
+          // マウスオーバー時に再生する
+          element.addEventListener("mouseenter", () => {
+            effect.start();
+          });
+  
+          // マウスアウト時に再生する
+          element.addEventListener("mouseleave", () => {
+            effect.start();
+          });
+  
+          // 初回を再生する
+          effect.start();
+        }
+      }
+  
+    </script>
   </head>
   <body>
     <main>
@@ -18,7 +48,7 @@
         <div>
           <span class="code">TRN_TCLAS_800095</span>
           <div class="name-container">
-            <p class="name">RODOLPHO NIKERSON</p>
+            <p id="shuffle-effect" class="name">RODOLPHO NIKERSON</p>
           </div>
         </div>
         <div>

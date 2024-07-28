@@ -1,6 +1,12 @@
 import { API_URL } from './config.js'
+import ShuffleText from 'shuffle-text'
 
 document.addEventListener('DOMContentLoaded', () => {
+  const el = document.getElementById('shuffle-effect')
+  const text = new ShuffleText(el)
+
+  text.start()
+
   const form = document.querySelector('.channel-message-form')
   const messageTextarea = document.getElementById('message')
   const sendButton = document.querySelector('.button')
