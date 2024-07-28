@@ -1,26 +1,94 @@
 import { API_URL } from './config.js'
 
 document.addEventListener('DOMContentLoaded', () => {
-  document
-    .querySelector('.channel-message-form')
-    .addEventListener('submit', async (event) => {
-      event.preventDefault()
-      const message = document.getElementById('message').value
-      const messageTextarea = document.getElementById('message')
-      const sendButton = document.querySelector('.button')
+  const form = document.querySelector('.channel-message-form')
+  const messageTextarea = document.getElementById('message')
+  const sendButton = document.querySelector('.button')
+  const chatContainer = document.querySelector('.chat-container')
 
-      messageTextarea.disabled = true
-      sendButton.disabled = true
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault()
+    const message = messageTextarea.value.trim()
 
-      const chatContainer = document.getElementsByClassName('chat-container')[0]
-      const newMessageDiv = document.createElement('div')
-      newMessageDiv.className = 'me'
-      const newMessageP = document.createElement('p')
-      newMessageP.textContent = message
-      newMessageDiv.appendChild(newMessageP)
-      chatContainer.appendChild(newMessageDiv)
+    if (message) {
+      disableInput()
+      appendUserMessage(message)
+      clearTextarea()
+      const messages = getChatMessages()
+      appendLoader()
 
-      const messages = Array.from(chatContainer.children).map((child) => {
+      try {
+        const data = await fetchResponse(messages)
+        appendAssistantMessage(data)
+      } catch (error) {
+        console.error('Erro:', error)
+      } finally {
+        enableInput()
+        removeLoader()
+      }
+    }
+  })
+
+  function disableInput() {
+    messageTextarea.disabled = true
+    sendButton.disabled = true
+  }
+
+  function enableInput() {
+    messageTextarea.disabled = false
+    sendButton.disabled = false
+  }
+
+  function clearTextarea() {
+    messageTextarea.value = ''
+  }
+
+  function appendUserMessage(message) {
+    const userMessageDiv = createMessageDiv('me', message)
+    chatContainer.appendChild(userMessageDiv)
+    scrollToBottom()
+  }
+
+  function appendAssistantMessage(message) {
+    const assistantMessageDiv = createMessageDiv('npc', message)
+    chatContainer.appendChild(assistantMessageDiv)
+    scrollToBottom()
+  }
+
+  function appendLoader() {
+    const loaderDiv = document.createElement('div')
+    loaderDiv.className = 'loading-dots'
+    loaderDiv.innerHTML = `
+      <div class="loading-dots--dot"></div>
+      <div class="loading-dots--dot"></div>
+      <div class="loading-dots--dot"></div>
+    `
+    chatContainer.appendChild(loaderDiv)
+  }
+
+  function removeLoader() {
+    const loaderDiv = chatContainer.querySelector('.loading-dots')
+    if (loaderDiv) {
+      chatContainer.removeChild(loaderDiv)
+    }
+  }
+
+  function createMessageDiv(className, message) {
+    const messageDiv = document.createElement('div')
+    messageDiv.className = className
+    const messageP = document.createElement('p')
+    messageP.textContent = message
+    messageDiv.appendChild(messageP)
+    return messageDiv
+  }
+
+  function scrollToBottom() {
+    chatContainer.scrollTop = chatContainer.scrollHeight
+  }
+
+  function getChatMessages() {
+    return Array.from(chatContainer.children)
+      .map((child) => {
         const pElement = child.querySelector('p')
         if (pElement) {
           return {
@@ -29,53 +97,22 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         }
       })
+      .filter(Boolean)
+  }
 
-      messageTextarea.value = ''
-
-      const loaderDiv = document.createElement('div')
-      loaderDiv.className = 'loading-dots'
-      loaderDiv.innerHTML = `
-        <div class="loading-dots--dot"></div>
-        <div class="loading-dots--dot"></div>
-        <div class="loading-dots--dot"></div>
-      `
-      chatContainer.appendChild(loaderDiv)
-
-      chatContainer.scrollTop = chatContainer.scrollHeight
-
-      try {
-        const response = await fetch(API_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ messages }),
-        })
-
-        if (!response.ok) {
-          throw new Error('Erro no retorno da resposta.')
-        }
-
-        const data = await response.json()
-
-        chatContainer.removeChild(loaderDiv)
-
-        const newResponseDiv = document.createElement('div')
-        newResponseDiv.className = 'npc'
-        const newResponseP = document.createElement('p')
-        newResponseP.textContent = data
-        newResponseDiv.appendChild(newResponseP)
-        chatContainer.appendChild(newResponseDiv)
-
-        chatContainer.scrollTop = chatContainer.scrollHeight
-      } catch (error) {
-        chatContainer.removeChild(loaderDiv)
-
-        console.error('Erro:', error)
-      } finally {
-        messageTextarea.disabled = false
-        sendButton.disabled = false
-        messageTextarea.value = ''
-      }
+  async function fetchResponse(messages) {
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ messages }),
     })
+
+    if (!response.ok) {
+      throw new Error('Erro no retorno da resposta.')
+    }
+
+    return response.json()
+  }
 })
