@@ -1,0 +1,70 @@
+*,
+*::after,
+*::before {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+@import 'partials/colors';
+@import 'partials/layout';
+@import 'partials/buttons';
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+
+  scroll-behavior: smooth;
+
+  font-family: 'Play', sans-serif;
+}
+
+main {
+  width: 100%;
+  height: 100%;
+
+  background-color: $bg-container;
+  background-image: radial-gradient(
+    ellipse at 33% 10%,
+    $wine-normal 0%,
+    transparent 75%
+  );
+  background-repeat: no-repeat;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  flex-direction: column;
+}
+
+svg,
+img {
+  display: block;
+  width: 100%;
+}
+
+@import 'partials/animations';
+
+::-webkit-scrollbar {
+  background-color: transparent;
+}
+
+::-webkit-scrollbar-button,
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-track-piece,
+::-webkit-scrollbar-corner,
+::-webkit-resizer {
+  display: none;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: $red-normal;
+  border-bottom: 2px solid $yellow-normal;
+  border-right: 2px solid $yellow-normal;
+}
